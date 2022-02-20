@@ -135,7 +135,7 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
          */
         @Override
         public boolean hasNext() {
-            // TODO
+
             throw new NotImplementedError();
         }
 
