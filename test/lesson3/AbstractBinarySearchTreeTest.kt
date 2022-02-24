@@ -207,6 +207,24 @@ abstract class AbstractBinarySearchTreeTest {
         }
     }
 
+    protected fun myTestIterator() {
+        implementationTest { create().iterator().hasNext() }
+        implementationTest { create().iterator().next() }
+        val binarySet = create()
+        val iterator1 = binarySet.iterator()
+        assertFalse(iterator1.hasNext())//краевой случай
+        for (element in 0..10) {
+            binarySet += element
+        }
+        var count= 0;
+        while (iterator1.hasNext()) {
+            assertEquals(count, iterator1.next())//проверка, что правильно возвращает значения
+            count++
+        }
+
+    }
+
+
     protected fun doIteratorRemoveTest() {
         implementationTest { create().iterator().remove() }
         val random = Random()
@@ -272,6 +290,20 @@ abstract class AbstractBinarySearchTreeTest {
             }
             println("All clear!")
         }
+    }
+
+    protected fun myTest() {
+        implementationTest { create().iterator().remove() }
+        val binarySet = create()
+        binarySet += 1
+        val iterator = binarySet.iterator()
+        assertEquals(1, binarySet.size)
+        print("Iterating: ")
+        val element = iterator.next()
+        assertEquals(1, element)
+        iterator.remove()
+        assertEquals(0, binarySet.size)
+        assertEquals(false, binarySet.contains(1))
     }
 
     protected fun doSubSetTest() {
