@@ -80,9 +80,7 @@ public class JavaDynamicTasks {
             }
             stack.push(first.charAt(lengthF) + "");
         }
-String rez= printLcs(stack);
-        System.out.println(rez);
-        return rez;
+        return printLcs(stack);
 
     }
 
