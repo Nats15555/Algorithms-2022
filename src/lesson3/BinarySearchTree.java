@@ -3,6 +3,7 @@ package lesson3;
 import java.util.*;
 
 import kotlin.NotImplementedError;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,7 +14,6 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
         final T value;
         Node<T> left = null;
         Node<T> right = null;
-        Node<T> parent = null;
 
         Node(T value) {
             this.value = value;
@@ -103,6 +103,7 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
         throw new NotImplementedError();
     }
 
+
     @Nullable
     @Override
     public Comparator<? super T> comparator() {
@@ -123,7 +124,6 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
 
         private BinarySearchTreeIterator() {
             node = root;
-            searchParents(root);
             stack = new Stack<>();
         }
 
@@ -166,24 +166,11 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
             if (stack.empty()) {
                 throw new NoSuchElementException();
             }
-
             lastReturn = stack.pop();
             node = lastReturn.right;
 
-            return lastReturn.value;
-        }
 
-        private void searchParents(Node<T> node) {
-            if (node != null) {
-                if (node.left != null) {
-                    node.left.parent = node;
-                    searchParents(node.left);
-                }
-                if (node.right != null) {
-                    node.right.parent = node;
-                    searchParents(node.right);
-                }
-            }
+            return lastReturn.value;
         }
 
         /**
@@ -202,55 +189,56 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
         @Override
         public void remove() {
             if (lastReturn == null) throw new IllegalStateException();
-            Node<T> parentNext = lastReturn.parent;
-            if (parentNext != null && lastReturn.right == null && lastReturn.left == null) {
+            Node<T> parentNext = findParent(root, lastReturn.value);
+
+            if (lastReturn.right == null && lastReturn.left == null) {
+                if (parentNext == root && parentNext == lastReturn) {
+                    root = null;
+                    return;
+                }
                 if (parentNext.left == lastReturn) {
                     parentNext.left = null;
                 }
                 if (parentNext.right == lastReturn) {
                     parentNext.right = null;
                 }
+
             } else if (lastReturn.left == null || lastReturn.right == null) {
                 if (lastReturn.left == null) {
-                    if (parentNext != null && parentNext.left == lastReturn) {
+                    if (parentNext.left == lastReturn) {
                         parentNext.left = lastReturn.right;
                     } else {
-                        if (parentNext != null) {
+                        if (parentNext != lastReturn) {
                             parentNext.right = lastReturn.right;
                         } else {
                             root = lastReturn.right;
                         }
                     }
-                    if(lastReturn.right!=null){
-                        lastReturn.right.parent = parentNext;
-                    }
                 } else {
-                    if (parentNext != null && parentNext.left == lastReturn) {
+                    if (parentNext.left == lastReturn) {
                         parentNext.left = lastReturn.left;
                     } else {
-                        if (parentNext != null) {
+                        if (parentNext != lastReturn) {
                             parentNext.right = lastReturn.left;
                         } else {
                             root = lastReturn.left;
                         }
                     }
-                    lastReturn.left.parent = parentNext;
                 }
             } else {
                 Node<T> minNode = minimum(lastReturn.right);
+                Node<T> parentMinNode = findParent(minNode, minNode.right.value);
                 if (minNode.right != null) {
-                    minNode.parent.left = minNode.right;
+                    parentMinNode.left = minNode.right;
                 } else {
-                    minNode.parent.left = null;
+                    parentMinNode.left = null;
                 }
                 minNode.right = lastReturn.right;
                 minNode.left = lastReturn.left;
-                if (parentNext != null) {
-                    if (lastReturn.parent.left == lastReturn) {
-                        parentNext.left = minNode;
-                    } else {
-                        parentNext.right = minNode;
-                    }
+                if (parentNext.left == lastReturn) {
+                    parentNext.left = minNode;
+                } else {
+                    parentNext.right = minNode;
                 }
             }
             lastReturn = null;
@@ -262,6 +250,23 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
                 return node;
             }
             return minimum(node.left);
+        }
+
+        private Node<T> findParent(Node<T> start, T child) {
+            int comparison = child.compareTo(start.value);
+            if (comparison == 0) {
+                return start;
+            } else if (comparison < 0) {
+                if (child.compareTo(start.left.value) == 0) {
+                    return start;
+                }
+                return findParent(start.left, child);
+            } else {
+                if (child.compareTo(start.right.value) == 0) {
+                    return start;
+                }
+                return findParent(start.right, child);
+            }
         }
     }
 

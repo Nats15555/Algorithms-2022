@@ -2,8 +2,7 @@ package lesson7;
 
 import kotlin.NotImplementedError;
 
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
 @SuppressWarnings("unused")
 public class JavaDynamicTasks {
@@ -19,7 +18,7 @@ public class JavaDynamicTasks {
      * Если есть несколько самых длинных общих подпоследовательностей, вернуть любую из них.
      * При сравнении подстрок, регистр символов *имеет* значение.
      */
-    // Время О(mn) + O(max(m, n))
+    // Время О(mn)
     // Память О(mn) + O(размер найденной подпоследовательности)
     public static String longestCommonSubSequence(String first, String second) {
         int lengthF = first.length();
@@ -56,7 +55,7 @@ public class JavaDynamicTasks {
 
         }
 
-        Stack<String> stack = new Stack<>();
+        StringBuilder str = new StringBuilder();
         lengthF--;
         lengthS--;
         if (matrix[lengthF][lengthS] == 0) {
@@ -65,7 +64,7 @@ public class JavaDynamicTasks {
         while (lengthS != 0 && lengthF != 0) {
             if ((matrix[lengthF - 1][lengthS - 1] == matrix[lengthF][lengthS] - 1) &&
                     (first.charAt(lengthF) == second.charAt(lengthS))) {
-                stack.push(first.charAt(lengthF) + "");
+                str.append(first.charAt(lengthF));
                 lengthS--;
                 lengthF--;
             } else if (matrix[lengthF - 1][lengthS] == matrix[lengthF][lengthS]) {
@@ -74,23 +73,16 @@ public class JavaDynamicTasks {
                 lengthS--;
             }
         }
+
         if (matrix[lengthF][lengthS] != 0) {
             if (lengthS == 0 && matrix[0][lengthS] != 0) {
                 lengthF = 0;
             }
-            stack.push(first.charAt(lengthF) + "");
+            str.append(first.charAt(lengthF));
         }
-        return printLcs(stack);
-
-    }
-
-    public static String printLcs(Stack<String> stack) {
-        StringBuilder str = new StringBuilder();
-        while (!stack.empty()) {
-            str.append(stack.pop());
-        }
-
+        str.reverse();
         return str.toString();
+
     }
 
     /**
@@ -106,7 +98,6 @@ public class JavaDynamicTasks {
      * В примере ответами являются 2, 8, 9, 12 или 2, 5, 9, 12 -- выбираем первую из них.
      */
     public static List<Integer> longestIncreasingSubSequence(List<Integer> list) {
-
         throw new NotImplementedError();
     }
 

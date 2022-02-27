@@ -2,6 +2,8 @@ package lesson1;
 
 import kotlin.NotImplementedError;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -105,36 +107,49 @@ public class JavaTasks {
      * 99.5
      * 121.3
      */
-    //Время O(nlogn)
+    //Время O(n)
     //Память О(n)
     static public void sortTemperatures(String inputName, String outputName) throws IOException {
-        Scanner in = new Scanner(Paths.get(inputName));
         String strBuff;
-        List<Float> listTemperatures = new ArrayList<>();
-        while (in.hasNextLine()) {
-            strBuff = in.nextLine();
-            if (!strBuff.matches("^[+-]?([0-9]*[.])?[0-9]+$")) {
-                throw new IllegalArgumentException();
+        try (BufferedReader in = new BufferedReader(new FileReader(inputName));
+             FileWriter writer = new FileWriter(outputName)) {
+
+            int[] neg = new int[2731];
+            int[] pos = new int[5001];
+
+            while ((strBuff = in.readLine()) != null) {
+                if (!strBuff.matches("^[+-]?([0-9]*[.])?[0-9]+$")) {
+                    throw new IllegalArgumentException();
+                }
+                float temp = Float.parseFloat(strBuff);
+                if (temp >= -273.0 && temp <= 500.0) {
+                    temp *= 10;
+                    if (temp >= 0) {
+                        pos[(int) temp]++;
+                    } else {
+                        neg[(int) Math.abs(temp)]++;
+                    }
+                } else {
+                    throw new IllegalArgumentException();
+                }
             }
-            float temp = Float.parseFloat(strBuff);
-            if (temp >= -273.0 && temp <= 500.0) {
-                listTemperatures.add(temp);
-            } else {
-                throw new IllegalArgumentException();
+            for (int i = 2730; i > 0; i--) {
+                int buff = neg[i];
+                while (buff > 0) {
+                    writer.write("-" + (double) i / 10 +"\n");
+                    buff--;
+                }
             }
-        }
-        Collections.sort(listTemperatures);
-        try (FileWriter writer = new FileWriter(outputName, false)) {
-            for (Float it : listTemperatures) {
-                writer.write(new DecimalFormat("#0.0").format(it).replace(",", ".") + "\n");
+
+            for (int i = 0; i <= 5000; i++) {
+                int buff = pos[i];
+                while (buff > 0) {
+                    writer.write((double) i / 10 + "\n");
+                    buff--;
+                }
             }
             writer.flush();
-        } catch (IOException ex) {
-            System.out.println(ex.getMessage());
-        }finally {
-            in.close();
         }
-
     }
 
     /**
@@ -169,67 +184,52 @@ public class JavaTasks {
     //Память О(n)
     //Время O(n)
     static public void sortSequence(String inputName, String outputName) throws IOException {
-        Scanner in = new Scanner(Paths.get(inputName));
         String strBuff = "";
         List<Integer> listSequence = new ArrayList<>();
         Map<Integer, Integer> mapSequence = new HashMap<>();
-        while (in.hasNextLine()) {
-            strBuff = in.nextLine();
-            if (!strBuff.matches("^\\d+$")) {
-                throw new IllegalArgumentException();
-            }
-            listSequence.add(Integer.parseInt(strBuff));
-        }
-        for (Integer it : listSequence) {
-            if (mapSequence.containsKey(it)) {
-                mapSequence.get(it);
-                mapSequence.put(it, mapSequence.get(it) + 1);
-            } else {
-                mapSequence.put(it, 1);
-            }
-        }
-        if (listSequence.size() == mapSequence.size()) {
-            try (FileWriter writer = new FileWriter(outputName, false)) {
-                for (Integer it : listSequence) {
-                    writer.write(it + "\n");
+        try (BufferedReader in = new BufferedReader(new FileReader(inputName));
+             FileWriter writer = new FileWriter(outputName)) {
+            while ((strBuff = in.readLine()) != null) {
+                if (!strBuff.matches("^\\d+$")) {
+                    throw new IllegalArgumentException();
                 }
-                writer.flush();
-            } catch (IOException ex) {
-                System.out.println(ex.getMessage());
-            }finally {
-                in.close();
+                listSequence.add(Integer.parseInt(strBuff));
+
             }
-            return;
-        }
-        Map.Entry<Integer, Integer> frequentNumber = null;
-        boolean chek = true;
-        for (Map.Entry<Integer, Integer> it : mapSequence.entrySet()) {
-            if (chek) {
-                frequentNumber = it;
-                chek = false;
-                continue;
+            for (Integer it : listSequence) {
+                if (mapSequence.containsKey(it)) {
+                    mapSequence.get(it);
+                    mapSequence.put(it, mapSequence.get(it) + 1);
+                } else {
+                    mapSequence.put(it, 1);
+                }
             }
-            if (it.getValue() > frequentNumber.getValue() || (it.getValue().equals(frequentNumber.getValue())
-                    && it.getKey() < frequentNumber.getKey())) {
-                frequentNumber = it;
+            Map.Entry<Integer, Integer> frequentNumber = null;
+            boolean chek = true;
+            for (Map.Entry<Integer, Integer> it : mapSequence.entrySet()) {
+                if (chek) {
+                    frequentNumber = it;
+                    chek = false;
+                    continue;
+                }
+                if (it.getValue() > frequentNumber.getValue() || (it.getValue().equals(frequentNumber.getValue())
+                        && it.getKey() < frequentNumber.getKey())) {
+                    frequentNumber = it;
+                }
             }
-        }
-        try (FileWriter writer = new FileWriter(outputName, false)) {
+
             for (Integer it : listSequence) {
                 if (!frequentNumber.getKey().equals(it)) {
                     writer.write(it + "\n");
                 }
             }
-            for (int i = 0; i < frequentNumber.getValue(); i++) {
-                writer.write(frequentNumber.getKey() + "\n");
+            if (frequentNumber != null) {
+                for (int i = 0; i < frequentNumber.getValue(); i++) {
+                    writer.write(frequentNumber.getKey() + "\n");
+                }
             }
             writer.flush();
-        } catch (IOException ex) {
-            System.out.println(ex.getMessage());
-        }finally {
-                in.close();
         }
-
     }
 
     /**

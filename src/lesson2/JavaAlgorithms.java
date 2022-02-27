@@ -102,7 +102,7 @@ public class JavaAlgorithms {
      * Если имеется несколько самых длинных общих подстрок одной длины,
      * вернуть ту из них, которая встречается раньше в строке first.
      */
-    //Память О(mn)
+    //Время О(mn)
     //Память О(mn)
     static public String longestCommonSubstring(String firs, String second) {
         int lengthF = firs.length();
