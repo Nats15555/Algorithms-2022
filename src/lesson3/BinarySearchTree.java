@@ -194,6 +194,7 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
             if (lastReturn.right == null && lastReturn.left == null) {
                 if (parentNext == root && parentNext == lastReturn) {
                     root = null;
+                    size--;
                     return;
                 }
                 if (parentNext.left == lastReturn) {
