@@ -19,6 +19,9 @@ class DynamicTestsJava : AbstractDynamicTests() {
     @Tag("7")
     fun testLongestIncreasingSubSequenceJava() {
         longestIncreasingSubSequence { JavaDynamicTasks.longestIncreasingSubSequence(it) }
+        assertEquals(listOf(33), JavaDynamicTasks.longestIncreasingSubSequence(listOf(33, 33, 33, 33, 33, 33)))
+        assertEquals(listOf(33), JavaDynamicTasks.longestIncreasingSubSequence(listOf(33, 13, 13, 13)))
+        assertEquals(listOf(13, 33), JavaDynamicTasks.longestIncreasingSubSequence(listOf(33, 13, 13, 13, 33)))
     }
 
     @Test

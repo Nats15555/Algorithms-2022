@@ -23,7 +23,7 @@ public class JavaDynamicTasks {
     public static String longestCommonSubSequence(String first, String second) {
         int lengthF = first.length();
         int lengthS = second.length();
-        if(lengthF==0 || lengthS==0){
+        if (lengthF == 0 || lengthS == 0) {
             return "";
         }
 
@@ -97,8 +97,32 @@ public class JavaDynamicTasks {
      * то вернуть ту, в которой числа расположены раньше (приоритет имеют первые числа).
      * В примере ответами являются 2, 8, 9, 12 или 2, 5, 9, 12 -- выбираем первую из них.
      */
+    //Время О(nlogn)
+    //Память O(n)
     public static List<Integer> longestIncreasingSubSequence(List<Integer> list) {
-        throw new NotImplementedError();
+        if (list.size() < 2) {
+            return list;
+        }
+        List<List<Integer>> listLIS = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            listLIS.add(new ArrayList<>());
+        }
+        listLIS.get(0).add(list.get(0));
+        for (int i = 1; i < list.size(); i++) {
+            for (int j = 0; j < i; j++) {
+                if (list.get(j) < list.get(i) && listLIS.get(j).size() > listLIS.get(i).size()) {
+                    listLIS.set(i, new ArrayList<>(listLIS.get(j)));
+                }
+            }
+            listLIS.get(i).add(list.get(i));
+        }
+        int j = 0;
+        for (int i = 0; i < list.size(); i++) {
+            if (listLIS.get(j).size() < listLIS.get(i).size()) {
+                j = i;
+            }
+        }
+        return listLIS.get(j);
     }
 
     /**
