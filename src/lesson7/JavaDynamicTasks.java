@@ -19,7 +19,7 @@ public class JavaDynamicTasks {
      * При сравнении подстрок, регистр символов *имеет* значение.
      */
     // Время О(mn)
-    // Память О(mn) + O(размер найденной подпоследовательности)
+    // Память О(mn)
     public static String longestCommonSubSequence(String first, String second) {
         int lengthF = first.length();
         int lengthS = second.length();
@@ -97,8 +97,8 @@ public class JavaDynamicTasks {
      * то вернуть ту, в которой числа расположены раньше (приоритет имеют первые числа).
      * В примере ответами являются 2, 8, 9, 12 или 2, 5, 9, 12 -- выбираем первую из них.
      */
-    //Время О(nlogn)
-    //Память O(n)
+    //Время О(n^2)
+    //Память O(n^2)
     public static List<Integer> longestIncreasingSubSequence(List<Integer> list) {
         if (list.size() < 2) {
             return list;
