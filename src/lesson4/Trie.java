@@ -1,7 +1,7 @@
 package lesson4;
 
 import java.util.*;
-import kotlin.NotImplementedError;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -84,16 +84,66 @@ public class Trie extends AbstractSet<String> implements Set<String> {
 
     /**
      * Итератор для префиксного дерева
-     *
+     * <p>
      * Спецификация: {@link Iterator} (Ctrl+Click по Iterator)
-     *
+     * <p>
      * Сложная
      */
     @NotNull
     @Override
     public Iterator<String> iterator() {
-        // TODO
-        throw new NotImplementedError();
+        return new TreeIterator();
     }
+
+    public class TreeIterator implements Iterator<String> {
+        String lastString = "";
+        Deque<String> stack = new ArrayDeque<>();
+
+        private TreeIterator() {
+            readTree(root, "");
+        }
+
+        @Override
+        public boolean hasNext() {
+            return !stack.isEmpty();
+        }
+
+        // Время О(n)
+        // Память О(n)
+        @Override
+        public String next() {
+            if (stack.isEmpty()) {
+                throw new NoSuchElementException();
+            }
+            String string = stack.pollFirst();
+            lastString = string;
+            return string;
+        }
+
+        // Время О(n)
+        // Память О(n)
+        @Override
+        public void remove() {
+            if (lastString.equals("")) {
+                throw new IllegalStateException();
+            }
+            Node current = findNode(lastString);
+            if (current.children.remove((char) 0) != null) {
+                size--;
+            }
+            lastString = "";
+        }
+
+        public void readTree(Node node, String str) {
+            for (Map.Entry<Character, Node> it : node.children.entrySet()) {
+                if (it.getKey() != (char) 0) {
+                    readTree(it.getValue(), str + it.getKey());
+                } else {
+                    stack.add(str);
+                }
+            }
+        }
+    }
+
 
 }
