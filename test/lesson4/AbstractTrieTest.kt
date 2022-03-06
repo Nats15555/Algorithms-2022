@@ -80,10 +80,10 @@ abstract class AbstractTrieTest {
             }
             println("Control set: $controlSet")
             val trieSet = create()
-            /*assertFalse(
+            assertFalse(
                 trieSet.iterator().hasNext(),
                 "Iterator of an empty set should not have any next elements."
-            )*/
+            )
             for (element in controlSet) {
                 trieSet += element
             }
@@ -110,6 +110,33 @@ abstract class AbstractTrieTest {
             }
             println("All clear!")
         }
+    }
+
+    protected fun myTestIterator() {
+        implementationTest { create().iterator().hasNext() }
+        implementationTest { create().iterator().next() }
+        val controlSet = sortedSetOf<String>()
+        val trieSet = create()
+        assertFalse(trieSet.iterator().hasNext())//краевой случай
+        controlSet.add("string")
+        controlSet.add("str")
+        controlSet.add("stri")
+        controlSet.add("asd")
+        controlSet.add("al")
+        controlSet.add("als")
+        for (element in controlSet) {
+            trieSet += element
+        }
+        var count = 0;
+        val trieIter = trieSet.iterator()
+        while (trieIter.hasNext()) {//проверка, что обходит все значения
+            val element = trieIter.next()
+            assertTrue(controlSet.contains(element))
+            if (controlSet.contains(element)) {
+                count++
+            }
+        }
+        assertEquals(6, count)
     }
 
     protected fun doIteratorRemoveTest() {
@@ -171,6 +198,30 @@ abstract class AbstractTrieTest {
             }
             println("All clear!")
         }
+    }
+
+    protected fun myTestRemove() {
+        implementationTest { create().iterator().hasNext() }
+        implementationTest { create().iterator().next() }
+        val controlSet = sortedSetOf<String>()
+        val trieSet = create()
+        controlSet.add("string")
+        controlSet.add("str")
+        controlSet.add("stri")
+        controlSet.add("asd")
+        controlSet.add("al")
+        controlSet.add("als")
+        assertFailsWith<IllegalStateException> { trieSet.iterator().remove() }// проверка, что пытаются удалить когда нет элементов
+        for (element in controlSet) {
+            trieSet += element
+        }
+        val trieIter = trieSet.iterator()
+        while (trieIter.hasNext()) {//проверка, что удаляет все
+            val element = trieIter.next()
+            trieIter.remove()
+            assertFalse(trieSet.contains(element))
+        }
+        assertFailsWith<IllegalStateException> { trieIter.remove() }// проверка, что пытаются удалить когда нет элементов
     }
 
 }
