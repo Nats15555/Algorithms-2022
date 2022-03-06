@@ -97,32 +97,42 @@ public class JavaDynamicTasks {
      * то вернуть ту, в которой числа расположены раньше (приоритет имеют первые числа).
      * В примере ответами являются 2, 8, 9, 12 или 2, 5, 9, 12 -- выбираем первую из них.
      */
-    //Время О(n^2)
-    //Память O(n^2)
+    //Время О(nlogn)
+    //Память O(n)
     public static List<Integer> longestIncreasingSubSequence(List<Integer> list) {
-        if (list.size() < 2) {
-            return list;
-        }
-        List<List<Integer>> listLIS = new ArrayList<>();
-        for (int i = 0; i < list.size(); i++) {
-            listLIS.add(new ArrayList<>());
-        }
-        listLIS.get(0).add(list.get(0));
-        for (int i = 1; i < list.size(); i++) {
-            for (int j = 0; j < i; j++) {
-                if (list.get(j) < list.get(i) && listLIS.get(j).size() > listLIS.get(i).size()) {
-                    listLIS.set(i, new ArrayList<>(listLIS.get(j)));
-                }
-            }
-            listLIS.get(i).add(list.get(i));
-        }
-        int j = 0;
-        for (int i = 0; i < list.size(); i++) {
-            if (listLIS.get(j).size() < listLIS.get(i).size()) {
-                j = i;
+        int[] buffIndexes = new int[list.size()];
+        int[] reversLis = new int[list.size() + 1];
+        int length = 0;
+        for (int i = list.size() - 1; i >= 0; i--) {
+            int buffLength = binarySearchIndex(list, length, reversLis, i);
+            buffIndexes[i] = reversLis[buffLength - 1];
+            reversLis[buffLength] = i;
+            if (buffLength > length) {
+                length = buffLength;
             }
         }
-        return listLIS.get(j);
+        int[] lis = new int[length];
+        int index = reversLis[length];
+        List<Integer> result = new ArrayList<>();
+        for (int i = length - 1; i >= 0; i--) {
+            lis[i] = list.get(index);
+            result.add(lis[i]);
+            index = buffIndexes[index];
+        }
+        return result;
+    }
+
+    private static int binarySearchIndex(List<Integer> list, int high, int[] reversLis, int index) {
+        int low = 1;
+        while (low <= high) {
+            int mid = (low + high) / 2;
+            if (list.get(reversLis[mid]) <= list.get(index)) {
+                high = mid - 1;
+            } else {
+                low = mid + 1;
+            }
+        }
+        return low;
     }
 
     /**
