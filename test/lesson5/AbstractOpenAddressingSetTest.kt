@@ -4,10 +4,7 @@ import ru.spbstu.kotlin.generate.util.nextString
 import java.util.*
 import kotlin.NoSuchElementException
 import kotlin.math.abs
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 abstract class AbstractOpenAddressingSetTest {
 
@@ -77,6 +74,22 @@ abstract class AbstractOpenAddressingSetTest {
                 )
             }
         }
+    }
+
+    protected fun myRemoveTest() {
+        val set = create<String>(4)
+        val toRemove = "1"
+        set.add(toRemove)
+        set.remove(toRemove)
+        assertTrue { set.isEmpty() }
+        assertFalse { set.remove(toRemove) }
+        for (i in 0..10) {
+            set.add(i.toString())
+        }
+        for (i in 0..10) {
+            set.remove(i.toString())
+        }
+        assertTrue { set.isEmpty() }
     }
 
     protected fun doIteratorTest() {
@@ -177,4 +190,28 @@ abstract class AbstractOpenAddressingSetTest {
             println("All clear!")
         }
     }
+
+    protected fun myIteratorRemoveTest() {
+        val set = create<String>(4)
+        set.add(1.toString())
+        var iterator = set.iterator()
+        if (iterator.hasNext()) {
+            iterator.next()
+            iterator.remove()
+        }
+        assertTrue { set.isEmpty() }
+        assertFailsWith<IllegalStateException>() {
+            iterator.remove()
+        }
+        for (i in 0..10) {
+            set.add(i.toString())
+        }
+        iterator = set.iterator()
+        while (iterator.hasNext()) {
+            iterator.next()
+            iterator.remove()
+        }
+        assertTrue { set.isEmpty() }
+    }
+
 }

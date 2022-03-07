@@ -1,10 +1,12 @@
 package lesson5;
 
 import kotlin.NotImplementedError;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.util.AbstractSet;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 public class OpenAddressingSet<T> extends AbstractSet<T> {
@@ -12,6 +14,8 @@ public class OpenAddressingSet<T> extends AbstractSet<T> {
     private final int bits;
 
     private final int capacity;
+
+    private final Object DELETE = new Object();
 
     private final Object[] storage;
 
@@ -54,10 +58,10 @@ public class OpenAddressingSet<T> extends AbstractSet<T> {
 
     /**
      * Добавление элемента в таблицу.
-     *
+     * <p>
      * Не делает ничего и возвращает false, если такой же элемент уже есть в таблице.
      * В противном случае вставляет элемент в таблицу и возвращает true.
-     *
+     * <p>
      * Бросает исключение (IllegalStateException) в случае переполнения таблицы.
      * Обычно Set не предполагает ограничения на размер и подобных контрактов,
      * но в данном случае это было введено для упрощения кода.
@@ -67,7 +71,7 @@ public class OpenAddressingSet<T> extends AbstractSet<T> {
         int startingIndex = startingIndex(t);
         int index = startingIndex;
         Object current = storage[index];
-        while (current != null) {
+        while (current != null && current != DELETE) {
             if (current.equals(t)) {
                 return false;
             }
@@ -84,34 +88,85 @@ public class OpenAddressingSet<T> extends AbstractSet<T> {
 
     /**
      * Удаление элемента из таблицы
-     *
+     * <p>
      * Если элемент есть в таблица, функция удаляет его из дерева и возвращает true.
      * В ином случае функция оставляет множество нетронутым и возвращает false.
      * Высота дерева не должна увеличиться в результате удаления.
-     *
+     * <p>
      * Спецификация: {@link Set#remove(Object)} (Ctrl+Click по remove)
-     *
+     * <p>
      * Средняя
      */
+    //Время O(n)
     @Override
     public boolean remove(Object o) {
-        return super.remove(o);
+        int startingIndex = startingIndex(o);
+        int index = startingIndex;
+        Object current = storage[index];
+        while (current != null) {
+            if (current.equals(o)) {
+                storage[index] = DELETE;
+                size--;
+                return true;
+            }
+            index = (index + 1) % capacity;
+            if (index == startingIndex) {
+                return false;
+            }
+            current = storage[index];
+        }
+        return false;
     }
 
     /**
      * Создание итератора для обхода таблицы
-     *
+     * <p>
      * Не забываем, что итератор должен поддерживать функции next(), hasNext(),
      * и опционально функцию remove()
-     *
+     * <p>
      * Спецификация: {@link Iterator} (Ctrl+Click по Iterator)
-     *
+     * <p>
      * Средняя (сложная, если поддержан и remove тоже)
      */
     @NotNull
     @Override
     public Iterator<T> iterator() {
-        // TODO
-        throw new NotImplementedError();
+        return new OpenAddressingSetIterator();
+    }
+
+    public class OpenAddressingSetIterator implements Iterator<T> {
+        int sizeIterator = 0;
+        int index = 0;
+
+        @Override
+        public boolean hasNext() {
+            return sizeIterator < size;
+        }
+
+        //Время O(n)
+        @Override
+        public T next() {
+            if (sizeIterator == size) {
+                throw new NoSuchElementException();
+            }
+            T current = null;
+            while (current == null || current == DELETE) {
+                current = (T) storage[index];
+                index++;
+            }
+            sizeIterator++;
+            return current;
+        }
+
+        @Override
+        public void remove() {
+            if (sizeIterator > 0 && storage[index - 1] != DELETE) {
+                storage[index - 1] = DELETE;
+                size--;
+                sizeIterator--;
+            } else {
+                throw new IllegalStateException();
+            }
+        }
     }
 }
