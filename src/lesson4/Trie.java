@@ -96,50 +96,62 @@ public class Trie extends AbstractSet<String> implements Set<String> {
     }
 
     public class TreeIterator implements Iterator<String> {
+        Node lastNode = null;
+        boolean chekLast = true;
+        boolean chekNext;
         String lastString = "";
-        Deque<String> stack = new ArrayDeque<>();
-
-        private TreeIterator() {
-            readTree(root, "");
-        }
+        String lastNext = "";
+        Set<String> wordsInTree = new HashSet<>();
 
         @Override
         public boolean hasNext() {
-            return !stack.isEmpty();
+            return wordsInTree.size() < size;
         }
 
         // Время О(n)
         // Память О(n)
         @Override
         public String next() {
-            if (stack.isEmpty()) {
+            if (!hasNext()) {
                 throw new NoSuchElementException();
             }
-            String string = stack.pollFirst();
-            lastString = string;
-            return string;
+            chekNext = true;
+            findNextElementTree(root, "");
+            String result = lastString;
+            lastString = "";
+            chekLast = true;
+            lastNext = result;
+            return result;
         }
 
         // Время О(n)
         // Память О(n)
         @Override
         public void remove() {
-            if (lastString.equals("")) {
+            if (!chekNext) {
                 throw new IllegalStateException();
             }
-            Node current = findNode(lastString);
+            chekNext = false;
+            Node current = lastNode.children.get(lastNext.charAt(lastNext.length() - 1));
             if (current.children.remove((char) 0) != null) {
                 size--;
             }
+            wordsInTree.remove(lastNext);
             lastString = "";
         }
 
-        public void readTree(Node node, String str) {
+        public void findNextElementTree(Node node, String str) {
             for (Map.Entry<Character, Node> it : node.children.entrySet()) {
-                if (it.getKey() != (char) 0) {
-                    readTree(it.getValue(), str + it.getKey());
+                if (it.getKey() != (char) 0 && chekLast) {
+                    lastNode = node;
+                    findNextElementTree(it.getValue(), str + it.getKey());
                 } else {
-                    stack.add(str);
+                    if (chekLast && !wordsInTree.contains(str)) {
+                        lastString += str;
+                        wordsInTree.add(lastString);
+                        chekLast = false;
+                        break;
+                    }
                 }
             }
         }

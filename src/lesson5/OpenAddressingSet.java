@@ -135,35 +135,39 @@ public class OpenAddressingSet<T> extends AbstractSet<T> {
     }
 
     public class OpenAddressingSetIterator implements Iterator<T> {
-        int sizeIterator = 0;
         int index = 0;
+        boolean isRemove = false;
 
         @Override
         public boolean hasNext() {
-            return sizeIterator < size;
+            while (index < capacity) {
+                if (storage[index] == null || storage[index] == DELETE) {
+                    index++;
+                } else {
+                    return true;
+                }
+            }
+            return false;
         }
 
         //Время O(n)
         @Override
         public T next() {
-            if (sizeIterator == size) {
+            if (!hasNext()) {
                 throw new NoSuchElementException();
             }
-            T current = null;
-            while (current == null || current == DELETE) {
-                current = (T) storage[index];
-                index++;
-            }
-            sizeIterator++;
+            T current = (T) storage[index];
+            index++;
+            isRemove = true;
             return current;
         }
 
         @Override
         public void remove() {
-            if (sizeIterator > 0 && storage[index - 1] != DELETE) {
+            if (isRemove) {
                 storage[index - 1] = DELETE;
                 size--;
-                sizeIterator--;
+                isRemove =false;
             } else {
                 throw new IllegalStateException();
             }
