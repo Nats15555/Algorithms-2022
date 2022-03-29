@@ -96,16 +96,21 @@ public class Trie extends AbstractSet<String> implements Set<String> {
     }
 
     public class TreeIterator implements Iterator<String> {
+        final Deque<Iterator<Map.Entry<Character, Node>>> dequeIteratorEntry = new LinkedList<>();
+        final StringBuilder nextString = new StringBuilder();
         Node lastNode = null;
-        boolean chekLast = true;
-        boolean chekNext;
-        String lastString = "";
-        String lastNext = "";
-        Set<String> wordsInTree = new HashSet<>();
+        Node lastNextNode = root;
+        boolean firstStep = true;
 
         @Override
         public boolean hasNext() {
-            return wordsInTree.size() < size;
+            if (size > 0 && firstStep) {
+                dequeIteratorEntry.addLast(root.children.entrySet().iterator());
+                firstStep = false;
+                findNextElementTree();
+            }
+
+            return nextString.length() != 0;
         }
 
         // Время О(n)
@@ -115,12 +120,11 @@ public class Trie extends AbstractSet<String> implements Set<String> {
             if (!hasNext()) {
                 throw new NoSuchElementException();
             }
-            chekNext = true;
-            findNextElementTree(root, "");
-            String result = lastString;
-            lastString = "";
-            chekLast = true;
-            lastNext = result;
+
+            String result = nextString.toString();
+            lastNode = lastNextNode;
+            lastNextNode = root;
+            findNextElementTree();
             return result;
         }
 
@@ -128,34 +132,49 @@ public class Trie extends AbstractSet<String> implements Set<String> {
         // Память О(n)
         @Override
         public void remove() {
-            if (!chekNext) {
+            if (lastNode == null) {
                 throw new IllegalStateException();
             }
-            chekNext = false;
-            Node current = lastNode.children.get(lastNext.charAt(lastNext.length() - 1));
-            if (current.children.remove((char) 0) != null) {
+
+            if (lastNode.children.remove((char) 0) != null) {
                 size--;
             }
-            wordsInTree.remove(lastNext);
-            lastString = "";
+
+            lastNode = null;
         }
 
-        public void findNextElementTree(Node node, String str) {
-            for (Map.Entry<Character, Node> it : node.children.entrySet()) {
-                if (it.getKey() != (char) 0 && chekLast) {
-                    lastNode = node;
-                    findNextElementTree(it.getValue(), str + it.getKey());
+        private void findNextElementTree() {
+            Iterator<Map.Entry<Character, Node>> nextNode = dequeIteratorEntry.peekLast();
+            while (nextNode != null && !nextNode.hasNext()) {
+                dequeIteratorEntry.pollLast();
+                if (dequeIteratorEntry.isEmpty()) {
+                    nextNode = null;
                 } else {
-                    if (chekLast && !wordsInTree.contains(str)) {
-                        lastString += str;
-                        wordsInTree.add(lastString);
-                        chekLast = false;
-                        break;
+                    nextString.deleteCharAt(nextString.length() - 1);
+                    nextNode = dequeIteratorEntry.peekLast();
+                }
+            }
+
+            lastNextNode = findNode(nextString.toString());
+            if (nextNode != null) {
+                while (nextNode.hasNext()) {
+                    Map.Entry<Character, Node> child = nextNode.next();
+                    nextNode = new HashMap<>(child.getValue().children).entrySet().iterator();
+                    dequeIteratorEntry.offerLast(nextNode);
+                    nextString.append(child.getKey());
+
+                    if (child.getKey() != (char) 0) {
+                        lastNextNode = lastNextNode.children.get(child.getKey());
                     }
+                }
+
+                if (nextString.charAt(nextString.length() - 1) != (char) 0) {
+                    findNextElementTree();
+                } else {
+                    nextString.deleteCharAt(nextString.length() - 1);
+                    dequeIteratorEntry.pollLast();
                 }
             }
         }
     }
-
-
 }
