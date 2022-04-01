@@ -148,7 +148,7 @@ public class JavaAlgorithms {
         int count = 0;
         boolean[] isPrime = new boolean[limit + 1];
         Arrays.fill(isPrime, true);
-        for (int i = 2; i < Math.abs(limit + 1); i++) {
+        for (int i = 2; i < Math.sqrt(limit + 1); i++) {
             if (isPrime[i]) {
                 for (int j = 2 * i; j < limit + 1; j += i) {
                     isPrime[j] = false;
